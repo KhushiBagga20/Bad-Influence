@@ -1,6 +1,17 @@
 import { path } from './guard-navigation.js';
 import { randomUUID } from 'node:crypto';
-import { MAPS, walls, COLORS, dist, los, move, props, lootSeeds, VAN, LOCK, NOISE, QUOTA, ROUND_SECONDS, type State, type Player, type Point } from '../../shared/world.js';
+import { MAPS, walls, COLORS, dist, los, move, props, lootSeeds, VAN, LOCK, NOISE, QUOTA, ROUND_SECONDS, LIGHT, HEAD_START, ARREST_COOLDOWN, MISS_COOLDOWN, inBeam, type State, type Player, type Point, type Prop, type VisibleProp } from '../../shared/world.js';
+/** Opaque per-round id handed to cops, so real props and disguised thieves can't be told apart by id. */
+const alias = () => 'o' + randomUUID().replace(/-/g, '').slice(0, 10);
+/** Snapshot copy without fields only the server needs. */
+function publicPlayer(p: Player): Player {
+    const { input, lastInput, lastSeen, ...rest } = p;
+    return rest as Player;
+}
+/** What a cop learns about a thief they can't see: identity and team status only, never position or disguise. */
+function hiddenPlayer(p: Player): Player {
+    return { id: p.id, name: p.name, color: p.color, role: p.role, ready: p.ready, connected: p.connected, spectator: p.spectator, captured: false, escaped: false, score: p.score, rescues: p.rescues, hidden: true, x: 0, y: 0, disguise: null, cooldown: 0, suspicion: 0, moving: false, rescue: 0 } as Player;
+}
 const routes: Point[][] = [[{ x: 120, y: 320 }, { x: 480, y: 320 }, { x: 480, y: 520 }, { x: 290, y: 520 }, { x: 290, y: 870 }, { x: 480, y: 870 }, { x: 480, y: 760 }, { x: 290, y: 760 }, { x: 290, y: 320 }], [{ x: 650, y: 330 }, { x: 1030, y: 330 }, { x: 1030, y: 760 }, { x: 940, y: 760 }, { x: 840, y: 620 }, { x: 650, y: 620 }, { x: 650, y: 330 }], [{ x: 1200, y: 330 }, { x: 1580, y: 330 }, { x: 1580, y: 520 }, { x: 1390, y: 520 }, { x: 1390, y: 740 }, { x: 1200, y: 740 }, { x: 1200, y: 330 }]];
 export class Room {
     paths = new Map<string, {
@@ -10,6 +21,10 @@ export class Room {
     }>();
     state: State;
     tokens = new Map<string, string>();
+    /** Player id → the anonymous prop id cops see while that thief is disguised. Never sent to clients. */
+    decoys = new Map<string, string>();
+    /** Real prop id → its anonymous id for this round. */
+    aliases = new Map<string, string>();
     vacantSince = 0;
     constructor(public code: string, mode: 'coop' | 'versus' = 'coop') { this.state = { mode, code, host: '', phase: 'lobby', players: [], loot: [], guards: [], seconds: ROUND_SECONDS, total: 0, quota: QUOTA, noiseCooldown: 0, noiseUntil: 0, message: '', outcome: '', tick: 0 }; }
     join(name: string, token?: string, color?: string) {
@@ -34,8 +49,11 @@ export class Room {
         return; p.connected = false; p.input = { x: 0, y: 0 }; p.lastSeen = Date.now(); this.drop(p); if (this.state.host === id)
         this.state.host = this.state.players.find(p => p.connected)?.id || id; this.checkEnd(); }
     player(id: string) { return this.state.players.find(p => p.id === id); }
-    input(id: string, x: number, y: number) { const p = this.player(id); if (!p || !Number.isFinite(x) || !Number.isFinite(y))
-        return; const n = Math.max(1, Math.hypot(x, y)); p.input = { x: x / n, y: y / n }; p.lastInput = Date.now(); }
+    input(id: string, x: number, y: number, aim?: unknown) { const p = this.player(id); if (!p || !Number.isFinite(x) || !Number.isFinite(y))
+        return; const n = Math.max(1, Math.hypot(x, y)); p.input = { x: x / n, y: y / n }; p.lastInput = Date.now();
+        // Cops aim with the mouse; without an explicit aim the flashlight follows movement.
+        if (typeof aim === 'number' && Number.isFinite(aim)) p.aim = Math.atan2(Math.sin(aim), Math.cos(aim));
+        else if (Math.hypot(x, y) > 0.2) p.aim = Math.atan2(y, x); }
     start(id: string) {
         const s = this.state, crew = s.players.filter(p => p.connected);
         if (id !== s.host || s.phase === 'playing')
@@ -45,7 +63,10 @@ export class Room {
         if (crew.some(p => !p.ready))
             throw Error('Everyone must ready up first.');
         s.phase = 'playing';
-        s.headStart=s.mode==='versus'?12:0;
+        s.headStart=s.mode==='versus'?HEAD_START:0;
+        s.noises=[];
+        this.decoys.clear();
+        this.aliases=new Map(props.map(q=>[q.id,alias()]));
         s.seconds = ROUND_SECONDS;
         s.total = 0;
         s.outcome = '';
@@ -58,10 +79,10 @@ export class Room {
         if(s.mode==='versus'){
             const candidates=[...crew];
             for(let i=candidates.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[candidates[i],candidates[j]]=[candidates[j],candidates[i]];}
-            candidates.slice(0,Math.max(1,Math.floor(crew.length/3))).forEach((p,i)=>{p.role='cop';p.x=700+i*100;p.y=150;});
+            candidates.slice(0,Math.max(1,Math.floor(crew.length/3))).forEach((p,i)=>{p.role='cop';p.x=700+i*100;p.y=150;p.aim=Math.PI/2;});
             const map=MAPS[s.selectedMap!==undefined&&s.selectedMap>=0?s.selectedMap:Math.floor(Math.random()*MAPS.length)];s.mapName=map.name;s.geometry=map.walls;
             s.quota=crew.length===2?800:Math.min(2400,(crew.length-Math.floor(crew.length/3))*600);
-            s.message=`${map.name}: roles assigned! Cops: E to inspect nearby suspects. Thieves: steal $${s.quota} and escape.`;
+            s.message=`${map.name}: lights out! Thieves, hide and steal $${s.quota}. Cops, your flashlights come on in ${HEAD_START} seconds.`;
         }
         s.loot = lootSeeds.map((l, i) => ({ ...l, id: 'l' + i, value: l.large ? 700 : 200, carriers: [], deposited: false }));
         s.guards = (s.mode==='versus'?[]:routes).map((r, i) => ({ id: 'g' + i, ...r[0], angle: 0, mode: 'patrol', target: null, last: { ...r[0] }, timer: 0, route: i, waypoint: 1 }));
@@ -111,12 +132,7 @@ export class Room {
         }
         if(p.role==='cop'){
             if((s.headStart||0)>0)return;
-            if(action==='interact'&&p.cooldown<=0){
-                p.cooldown=2;
-                const suspect=s.players.find(q=>q.role!=='cop'&&!(q.protectedFor!>0)&&q.connected&&!q.spectator&&!q.captured&&!q.escaped&&q.y<960&&dist(p,q)<65&&this.los(p,q));
-                if(suspect){this.drop(suspect);Object.assign(suspect,{captured:true,disguise:null,x:1440,y:870,suspicion:0});p.score+=1;s.message=`${p.name} arrested ${suspect.name}. Thieves can rescue them at the lock.`;this.checkEnd();}
-                else{s.message=`${p.name} inspected the furniture. Nothing to report.`;p.cooldown=4;}
-            }
+            if(action.startsWith('arrest:')&&p.cooldown<=0)this.arrest(p,action.slice(7));
             return;
         }
         if (action === 'drop') {
@@ -129,12 +145,14 @@ export class Room {
                 return;
             if (p.disguise) {
                 p.disguise = null;
+                this.decoys.delete(p.id);
                 p.cooldown = 1.5;
                 return;
             }
             const prop = props.filter(q => dist(q, p) < 100 && this.los(q, p)).sort((a, b) => dist(a, p) - dist(b, p))[0];
             if (prop) {
                 p.disguise = prop.kind;
+                this.decoys.set(p.id, alias());
                 p.sprintFor=0;
                 p.cooldown = 1.5;
                 for (const g of s.guards) {
@@ -209,6 +227,14 @@ export class Room {
         s.seconds = Math.max(0, s.seconds - dt);
         s.noiseCooldown = Math.max(0, s.noiseCooldown - dt);
         s.noiseUntil = Math.max(0, s.noiseUntil - dt);
+        // Sprinting thieves are loud: cops hear roughly where, never who.
+        const noises = (s.noises ||= []);
+        for (const n of noises) n.age += dt;
+        s.noises = noises.filter(n => n.age < 1.2);
+        if (s.mode === 'versus' && s.tick % 9 === 0)
+            for (const p of s.players)
+                if (p.role !== 'cop' && (p.sprintFor || 0) > 0 && p.connected && !p.spectator && !p.captured && !p.escaped)
+                    s.noises.push({ x: Math.round(p.x + (Math.random() - 0.5) * 50), y: Math.round(p.y + (Math.random() - 0.5) * 50), age: 0 });
         for (const p of s.players) {
             p.sprintFor=Math.max(0,(p.sprintFor||0)-dt);
             p.sprintCooldown=Math.max(0,(p.sprintCooldown||0)-dt);
@@ -348,6 +374,83 @@ export class Room {
             if (!seen.has(p.id))
                 p.suspicion = Math.max(0, p.suspicion - dt * 0.16);
         this.checkEnd();
+    }
+    /**
+     * A cop arrests one specific object they are pointing at: an anonymous prop id (real prop or
+     * disguised thief) or an undisguised thief's player id. Real props are a miss and cost time.
+     */
+    arrest(cop: Player, targetId: string) {
+        const s = this.state, geometry = s.geometry || walls, aim = cop.aim ?? Math.PI / 2;
+        const reachable = (pt: Point) => inBeam(cop, aim, pt, LIGHT.reach, true, geometry);
+        const propId = [...this.aliases].find(([, a]) => a === targetId)?.[0];
+        const prop = propId ? props.find(q => q.id === propId) : undefined;
+        if (prop) {
+            if (!reachable(prop))
+                throw Error('Get closer and point your flashlight at it.');
+            cop.cooldown = MISS_COOLDOWN;
+            s.message = `${cop.name} tried to arrest a ${prop.kind}. It had no comment.`;
+            return;
+        }
+        const owner = [...this.decoys].find(([, a]) => a === targetId)?.[0];
+        const suspect = this.player(owner || targetId);
+        if (!suspect || suspect.role === 'cop' || !suspect.connected || suspect.spectator || suspect.captured || suspect.escaped)
+            return;
+        // A disguised thief can only be caught through the prop they look like, never by player id.
+        if (owner ? !suspect.disguise : suspect.disguise)
+            return;
+        if (!reachable(suspect))
+            throw Error('Get closer and point your flashlight at them.');
+        if (suspect.y >= 960)
+            throw Error('The van apron is a safe zone.');
+        if ((suspect.protectedFor || 0) > 0)
+            throw Error(`${suspect.name} has a fresh rescue shield.`);
+        this.drop(suspect);
+        this.decoys.delete(suspect.id);
+        const held = s.players.filter(q => q.captured).length;
+        Object.assign(suspect, { captured: true, disguise: null, suspicion: 0, rescue: 0, x: 1370 + (held % 4) * 60, y: 870 });
+        cop.score += 1;
+        cop.cooldown = ARREST_COOLDOWN;
+        s.message = `${cop.name} arrested ${suspect.name}. Thieves can rescue them at the lock.`;
+        this.checkEnd();
+    }
+    /** Whether this viewer gets the dark-museum view instead of the full state. */
+    copView(viewer?: Player) {
+        return viewer?.role === 'cop' && !viewer.spectator && this.state.phase === 'playing' && this.state.mode === 'versus';
+    }
+    /**
+     * The state a client receives. Thieves and spectators see everything. Cops only receive what
+     * their team's flashlights could reveal: hidden thieves carry no position, and disguised thieves
+     * arrive mixed in with the real props under anonymous ids.
+     */
+    snapshot(forCop = false): State {
+        const s = this.state;
+        if (!forCop)
+            return { ...s, players: s.players.map(publicPlayer) };
+        const geometry = s.geometry || walls;
+        const cops = s.players.filter(p => p.role === 'cop' && p.connected && !p.spectator);
+        const blind = (s.headStart || 0) > 0;
+        const seen = (pt: Point) => !blind && cops.some(c => dist(c, pt) < LIGHT.view && los(c, pt, geometry));
+        const visibleProps: VisibleProp[] = [];
+        for (const q of props)
+            if (seen(q))
+                visibleProps.push({ id: this.aliases.get(q.id)!, kind: q.kind, x: q.x, y: q.y });
+        const players = s.players.map(p => {
+            if (p.role === 'cop' || p.captured || p.escaped)
+                return publicPlayer(p);
+            if (p.connected && !p.spectator && seen(p)) {
+                if (!p.disguise)
+                    return publicPlayer(p);
+                const id = this.decoys.get(p.id);
+                if (id)
+                    visibleProps.push({ id, kind: p.disguise as Prop['kind'], x: Math.round(p.x), y: Math.round(p.y) });
+            }
+            return hiddenPlayer(p);
+        });
+        // Sorted by position so list order can't single out the newcomers.
+        visibleProps.sort((a, b) => a.x - b.x || a.y - b.y);
+        // Pocketed loot moves with its thief, so it is never sent; floor loot and paintings only when seen.
+        const loot = s.loot.filter(l => !l.deposited && (l.large || !l.carriers.length) && seen(l));
+        return { ...s, players, loot, visibleProps, guards: [] };
     }
     checkEnd() { const s = this.state; if (s.phase !== 'playing')
         return; const crew = s.players.filter(p => !p.spectator&&p.role!=='cop'), connected = crew.filter(p => p.connected), free = connected.filter(p => !p.captured && !p.escaped); let outcome = ''; if (s.total >= s.quota && connected.some(p => p.escaped) && free.length === 0)

@@ -38,3 +38,26 @@ Development preview was stopped after verification. Run `npm run dev` to play ag
 - Two browser clients joined a new competitive match. Verified transparent prop/player rendering, textured floors, keyboard movement, nearby-copy prompts, sprint movement and cooldown feedback.
 - Screenshot: `screenshots/textured-gameplay.jpg`.
 - No physical-phone performance, complete-map human balance test or directional-animation verification was performed. Character sprites remain single-pose with movement bob.
+
+## Lights out: dark museum (18 November 2026)
+
+- `npm run typecheck`, `npm test` (34 passed, 1 network test skipped without a server; 9 new dark-museum tests), `npm run build` and `npm run test:production` (production HTML, guide, health and the real WebSocket test) all passed.
+- New tests cover: cops receive no position or disguise for thieves outside their light; disguised thieves reach cops only as anonymous props identical in shape to real ones; cops are blind during the head start; pocketed loot is never sent to cops; arrests land only on the targeted object (real prop = miss and 5s cooldown, player-id arrests of disguised thieves rejected, aiming away rejected); beams stop at walls and pass doorways; aim input validation; no server-only fields in snapshots; sprint noises are anonymous and fade.
+- Browser playtest with two tabs (one cop, one thief) on the original map: the cop's screen was dark with a floor plan during the head start, then showed the wall-clipped beam and glow. A disguised thief and the real statue next to it looked identical in the beam, with no name, ring or extra shadow. Arresting the real statue gave the 5-second miss; arresting the fake one captured the thief and the cops won. The thief's view was dimmed with the beam cut out, checked by sampling the darkness texture's pixels.
+- Found and fixed during the playtest: Phaser 3.90's `RenderTexture.resize()` does not resize the WebGL texture, so the darkness stayed 16×16 and stretched with no beam cut out. The darkness texture is now recreated when the view size changes.
+- Not verified: more than two players, phones/touch aiming, sustained frame rate on low-end devices, and balance (beam size, reach, miss cost, head start).
+
+## Pixel art and corkboard lobby (18 November 2026)
+
+- `npm run typecheck`, `npm test` (34 passed, 1 network test skipped), `npm run build` and `npm run test:production` passed. The pixel atlas and its credits file are copied into the build.
+- Browser checks with three tabs: the title scene (pixel floor, sprites, sweeping cop) at 800 × 600; the lobby at 1280 × 860 (three columns, everything on one screen), 800 × 600 and a 375 × 812 phone (one column, no horizontal scroll, string hidden, one WANTED slot). A second player joining showed their mugshot in their own colour, a READY stamp once ready, a second string to the target, and the non-host wording with the map choice disabled.
+- In a round on the Velvet Vault: the thief walked with facing sprites and a tinted shirt; pressing Q beside a plant turned them into a plant drawn from the same sprite as the real one (the colour ring is drawn only for thieves); the cop's sprite and pixel-font name showed in the beam after the head start.
+- Not verified: the walk cycle at full frame rate (the test pane was hidden, so frames were throttled), more than two players in a round, and a real phone.
+
+## Pixel HUD, help and front-page results (18 November 2026)
+
+- `npm run typecheck`, `npm test` (34 passed, 1 network test skipped), `npm run build` and `npm run test:production` passed.
+- Two-tab round: the LIGHTS OUT card in both roles, the HUD panels, keycaps and crew colours at 1000 × 640, the help overlay (focus on Close, Escape closes it), the cop's arrest count, and the radio box typing out a real server message. With touch controls on in an 812 × 375 window, short landscape screens now get the landscape-phone layout (mission line at the top, crew card hidden), which removed an overlap.
+- All three front pages (robbed, arrested, lockdown) were rendered from hand-made results states through a temporary page hook, since removed, at 1000 × 640 and a 375 × 812 phone.
+- Removed 53 CSS rules for classes from the old home, lobby and results screens that nothing uses.
+- Not verified: a real phone, and the stamp animation at full frame rate.

@@ -1,0 +1,10 @@
+pixel-museum.png is built by scripts/build-pixel-atlas.py from two packs by Kenney (www.kenney.nl):
+
+  RPG Urban Pack         https://opengameart.org/content/rpg-urban-pack
+  Roguelike Indoor pack  https://opengameart.org/content/roguelike-indoor-pack
+
+Both are released under Creative Commons Zero (CC0 1.0):
+http://creativecommons.org/publicdomain/zero/1.0/
+
+The cop and thief recolours, the burglar mask, the stone statue and the plinths are edits made by
+the build script. Thank you, Kenney.

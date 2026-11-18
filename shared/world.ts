@@ -11,6 +11,16 @@ export const VAN = { x: 840, y: 1070 };
 export const LOCK = { x: 1440, y: 800 };
 export const NOISE = { x: 240, y: 400 };
 export const QUOTA = 2400, ROUND_SECONDS = 420;
+/**
+ * Dark-museum flashlight rules (competitive mode).
+ * range/half: the beam's reach and half-angle. ambient: the small glow around every cop.
+ * reach: how far an arrest can land. view: how far the server sends cops nearby objects,
+ * deliberately wider than the beam so nothing visibly pops in when a cop turns.
+ */
+export const LIGHT = { range: 300, half: 0.5, ambient: 75, reach: 130, view: 380 };
+/** Extra distance/angle the server tolerates on arrests to absorb network latency. */
+export const ARREST_SLACK = { distance: 30, angle: 0.35 };
+export const HEAD_START = 30, ARREST_COOLDOWN = 2, MISS_COOLDOWN = 5;
 export const COLORS = ['#f3bf67', '#83d3bd', '#e48daa', '#a7a0ed', '#80bde0', '#ed956b'];
 export const walls: Rect[] = [{ x: 0, y: 0, w: 2640, h: 28 }, { x: 0, y: 0, w: 28, h: 1160 }, { x: 2612, y: 0, w: 28, h: 1160 }, { x: 0, y: 1132, w: 2640, h: 28 },
     { x: 28, y: 920, w: 660, h: 24 }, { x: 990, y: 920, w: 662, h: 24 },
@@ -57,6 +67,10 @@ export type Player = Point & {
     sprintCooldown?: number;
     protectedFor?: number;
     role?: 'cop' | 'thief';
+    /** Flashlight direction in radians (cops only). */
+    aim?: number;
+    /** Set in a cop's snapshot for thieves the cops cannot currently see; carries no position. */
+    hidden?: boolean;
     ready: boolean;
     connected: boolean;
     spectator: boolean;
@@ -83,7 +97,19 @@ export type Guard = Point & {
     route: number;
     waypoint: number;
 };
+/** A prop as a cop sees it: real props and disguised thieves look identical, with per-round anonymous ids. */
+export type VisibleProp = Point & {
+    id: string;
+    kind: Prop['kind'];
+};
+/** A sprinting thief's footsteps: an approximate position, no identity. */
+export type Noise = Point & {
+    age: number;
+};
 export type State = {
+    /** Only in a cop's snapshot: every prop near the cops, real or not. */
+    visibleProps?: VisibleProp[];
+    noises?: Noise[];
     selectedMap?: number;
     winner?: 'cops' | 'thieves';
     headStart?: number;
@@ -111,6 +137,63 @@ export const MAPS = [
  {name:'The Velvet Vault',walls:[...walls,{x:730,y:300,w:22,h:180},{x:1250,y:380,w:24,h:110},{x:380,y:620,w:24,h:110}]},
  {name:'Midnight Archive',walls:[...walls,{x:180,y:280,w:180,h:22},{x:900,y:380,w:150,h:22},{x:1200,y:200,w:210,h:22},{x:900,y:660,w:22,h:120}]}
 ];
+
+/** Signed smallest difference between two angles, in (-PI, PI]. */
+export const angleDelta = (a: number, b: number) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
+
+/** Distance along a ray until it hits a wall, capped at max. Props do not block light. */
+export function castRay(o: Point, angle: number, max: number, geometry = walls) {
+    const dx = Math.cos(angle), dy = Math.sin(angle);
+    let best = max;
+    for (const w of geometry) {
+        let near = -Infinity, far = Infinity;
+        if (Math.abs(dx) < 1e-9) {
+            if (o.x < w.x || o.x > w.x + w.w) continue;
+        } else {
+            const a = (w.x - o.x) / dx, b = (w.x + w.w - o.x) / dx;
+            near = Math.max(near, Math.min(a, b)); far = Math.min(far, Math.max(a, b));
+        }
+        if (Math.abs(dy) < 1e-9) {
+            if (o.y < w.y || o.y > w.y + w.h) continue;
+        } else {
+            const a = (w.y - o.y) / dy, b = (w.y + w.h - o.y) / dy;
+            near = Math.max(near, Math.min(a, b)); far = Math.min(far, Math.max(a, b));
+        }
+        if (far >= Math.max(near, 0)) best = Math.min(best, Math.max(near, 0));
+    }
+    return best;
+}
+
+/** The lit area around a cop: a wall-clipped beam plus a small ambient glow, as a star-shaped polygon. */
+export function lightPolygon(o: Point, aim: number, geometry = walls, range = LIGHT.range): Point[] {
+    const out: Point[] = [];
+    // Rays run 8 units into a wall so its face catches the light.
+    const ray = (a: number, r: number) => { const d = Math.min(r, castRay(o, a, r, geometry) + 8); out.push({ x: o.x + Math.cos(a) * d, y: o.y + Math.sin(a) * d }); };
+    for (let i = 0; i <= 32; i++) ray(aim - LIGHT.half + LIGHT.half * 2 * i / 32, range);
+    const back = Math.PI * 2 - LIGHT.half * 2;
+    for (let i = 0; i <= 24; i++) ray(aim + LIGHT.half + back * i / 24, LIGHT.ambient);
+    return out;
+}
+
+/** Whether a point sits inside a cop's beam within the given reach, with optional latency slack. */
+export function inBeam(cop: Point, aim: number, pt: Point, reach: number, slack = false, geometry = walls) {
+    const d = dist(cop, pt);
+    if (d > reach + (slack ? ARREST_SLACK.distance : 0)) return false;
+    const off = d < 1 ? 0 : Math.abs(angleDelta(Math.atan2(pt.y - cop.y, pt.x - cop.x), aim));
+    return off <= LIGHT.half + (slack ? ARREST_SLACK.angle : 0) && los(cop, pt, geometry);
+}
+
+/** The object a cop's flashlight is pointed at: the closest one to the beam's centre line within arrest reach. */
+export function pickTarget<T extends Point>(cop: Point, aim: number, candidates: T[], geometry = walls): T | undefined {
+    let best: T | undefined, score = Infinity;
+    for (const c of candidates) {
+        if (!inBeam(cop, aim, c, LIGHT.reach, false, geometry)) continue;
+        const d = dist(cop, c), off = d < 1 ? 0 : Math.abs(Math.sin(angleDelta(Math.atan2(c.y - cop.y, c.x - cop.x), aim))) * d;
+        const s = off + d * 0.15;
+        if (s < score) { score = s; best = c; }
+    }
+    return best;
+}
 
 /** Short visual prediction only; never used as an authoritative position. */
 export function predictPosition(player: Player, input: Point, age: number, state: State): Point {
