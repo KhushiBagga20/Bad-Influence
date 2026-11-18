@@ -16,6 +16,19 @@ else {
     const vite = await createServer({ configFile: fileURLToPath(new URL('../../frontend/vite.config.ts', import.meta.url)), server: { middlewareMode: true }, appType: 'spa' });
     app.use(vite.middlewares);
 }
+/** Sends each socket its own view: cops get the filtered dark-museum snapshot, everyone else the full one. */
+function broadcast(room: Room) {
+    const members = io.sockets.adapter.rooms.get(room.code);
+    if (!members)
+        return;
+    let full: ReturnType<Room['snapshot']> | undefined, cop: ReturnType<Room['snapshot']> | undefined;
+    for (const sid of members) {
+        const session = sessions.get(sid);
+        const viewer = session && room.player(session.id);
+        const view = room.copView(viewer) ? (cop ??= room.snapshot(true)) : (full ??= room.snapshot());
+        io.sockets.sockets.get(sid)?.emit('state', view);
+    }
+}
 function code() { const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; return Array.from({ length: 4 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join(''); }
 io.on('connection', socket => {
     let lastAction = 0, attempts = 0;
@@ -49,13 +62,13 @@ io.on('connection', socket => {
         sessions.set(socket.id, { room, id: p.id });
         socket.join(room.code);
         reply({ id: p.id, token, code: room.code });
-        io.to(room.code).emit('state', room.state);
+        broadcast(room);
     }
     catch (e) {
         reply({ error: (e as Error).message });
     } });
     socket.on('input', data => { const session = sessions.get(socket.id); if (session && data && typeof data.x === 'number' && typeof data.y === 'number')
-        session.room.input(session.id, data.x, data.y); });
+        session.room.input(session.id, data.x, data.y, data.aim); });
     socket.on('action', action => { if (Date.now() - lastAction < 100)
         return; lastAction = Date.now(); const session = sessions.get(socket.id); if (session && typeof action === 'string')
         try {
@@ -78,9 +91,15 @@ io.on('connection', socket => {
 });
 let previous = Date.now(), frame = 0;
 setInterval(() => { const now = Date.now(), dt = Math.min((now - previous) / 1000, .1); previous = now; frame++; for (const [code, room] of rooms) {
-    room.update(dt);
-    if (frame % 2 === 0)
-        io.to(code).emit('state', room.state);
+    // One room's bug must not crash the process and end every other room's game.
+    try {
+        room.update(dt);
+        if (frame % 2 === 0)
+            broadcast(room);
+    }
+    catch (e) {
+        console.error(`Room ${code} tick failed:`, e);
+    }
     if (room.state.players.every(p => !p.connected)) {
         if (!room.vacantSince)
             room.vacantSince = now;

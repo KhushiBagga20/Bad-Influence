@@ -1,3 +1,27 @@
+## Pixel art and the corkboard lobby
+
+- **Sprites:** one atlas, `frontend/public/assets/pixel-museum.png` (frame rectangles in `frontend/src/pixel-atlas.ts`), built by `scripts/build-pixel-atlas.py` from Kenney's CC0 RPG Urban and Roguelike Indoor packs. Everything is drawn at 4 world units per art pixel (`PX`) with nearest-neighbour sampling; gameplay zoom is 1 (0.75 on narrow screens), so pixels stay square.
+- **Characters** face up, down, left or right with a three-frame walk. Cops face their flashlight; everyone else faces where they last moved. Thieves have a separate greyscale striped-shirt layer tinted with the player's colour.
+- **Disguises** go through the same `prop()` call as real props, so a disguised thief is pixel-identical to the real thing. The colour ring is drawn only for thieves.
+- **Floor:** generated once at startup at one pixel per `PX` units: marble tiles per wing, rugs and inlays, with lamp pools and moonlight shaded by ordered dithering.
+- **HUD:** dark pixel panels with notched corners (four hard box-shadows), keycaps for the keyboard hints, a segmented haul bar, and a status line coloured by danger (calm, hidden, careful, in trouble). Server messages and errors appear in a SECURITY RADIO dialogue box that types itself out (instantly with reduced motion). The head start shows a LIGHTS OUT card with the role and a countdown. Short landscape windows get the same compact layout as landscape phones.
+- **Help:** a two-column manual (thieves, cops) with keycaps; Escape closes it.
+- **Results:** tomorrow's front page of *The Petty Gazette*. The headline depends on how the round ended (robbed, furniture arrested, or lockdown), with a pixel photo drawn from the sprite atlas and printed in newsprint grey, a stamp with your own result, and the persons of interest with their scores.
+- **Lobby:** a corkboard. The room code is on a sticky note, players are line-up mugshots with READY stamps, the map choice is a blueprint drawn as SVG from the map's walls, and red SVG string runs from each suspect to the target. On one-column phone layouts the string is skipped.
+
+## Lights out: the dark museum (current competitive mode)
+
+Competitive mode is now prop hunt in the dark. This supersedes the 12-second head start and the "inspect within 65 units" arrests described further down.
+
+- **Head start:** 30 seconds (`HEAD_START`). Cops can't move or act, and their snapshot contains no thieves, props or loot.
+- **Flashlights:** each cop has a beam (300 units, ±0.5 rad, `LIGHT` in `shared/world.ts`) clipped by walls, plus a 75-unit ambient glow. Cops aim with the mouse; on keyboard-only or touch the beam follows movement. The client sends `aim` with each input; the server stores it as `player.aim`.
+- **What cops receive:** `Room.snapshot(true)`. Anything within 380 units of a cop with line of sight is sent (wider than the beam so nothing pops in when a cop turns). Thieves outside that are stubs with `hidden: true` and no position. Disguised thieves are not sent as players at all; they appear in `visibleProps` alongside the real props, all with anonymous ids regenerated each round, sorted by position. Pocketed loot is never sent, because it moves with its thief. Thieves, spectators and results screens get the full state.
+- **Arrests:** the client sends `arrest:<id>` for the object its beam points at (closest to the beam's centre line within 130 units). The server re-checks reach, angle and line of sight with a little latency slack. A real prop costs a 5-second miss cooldown; a disguised thief can only be arrested through their prop id, never by player id. The van apron and rescue shield still protect thieves.
+- **Rendering:** a `RenderTexture` filled with darkness each frame, with every beam erased from it. It's fully opaque for cops (plus a faint floor plan drawn above it) and 45% for thieves, who see the beams brightly.
+- **Footsteps:** sprinting thieves leave `noises` (position jittered by ±25, no identity) that fade over 1.2 seconds and draw above the darkness.
+
+Known limits: the static prop list ships in the client bundle, so a determined cheater could diff `visibleProps` against it. Fully closing that needs randomised prop layouts per round. Balance (beam size, reach, miss cost, head start) has only been tested with one cop and one thief.
+
 ## Round-flow and movement polish
 
 Competitive rounds now give thieves a 12-second head start. Cops cannot move or inspect until it ends. Rescue grants five seconds of arrest protection, shown as a green shield. Role banners, objective guidance, a pulsing extraction zone and a last-30-second warning clarify the round.
