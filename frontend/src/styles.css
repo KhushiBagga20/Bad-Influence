@@ -280,3 +280,126 @@ body.touch .joystick{display:block}body.touch .controls{bottom:max(30px,env(safe
 .round-banner strong{font-size:30px}
 .radio{padding:14px 16px 10px;font-size:13px}
 }
+
+/* ===== Match HUD (teams, rounds, abilities) ===== */
+.connection-banner{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;max-width:min(560px,92vw);padding:10px 16px;color:var(--noir-cream);font:13px/1.4 var(--typewriter);background:#2a0f0cf2;box-shadow:-3px 0 0 var(--noir-alarm),3px 0 0 var(--noir-alarm),0 -3px 0 var(--noir-alarm),0 3px 0 var(--noir-alarm)}
+.connection-banner b{color:#ffb4a0}
+.connection-banner[hidden]{display:none}
+.scorebar,.role-card,.hud-side,.objective-bar,.ability,.heat,.prep-banner,.spectating,.settings-pop{border:0;border-radius:0;background:#0b0d0ae6;box-shadow:-3px 0 0 var(--noir-edge),3px 0 0 var(--noir-edge),0 -3px 0 var(--noir-edge),0 3px 0 var(--noir-edge),3px 6px 0 #00000080;color:var(--noir-cream);-webkit-font-smoothing:none}
+.scorebar{position:absolute;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px;padding:8px 14px}
+.scorebar .team{display:grid;grid-template-columns:auto auto;align-items:center;gap:0 8px;font:600 15px/1.1 var(--pixel);color:var(--team)}
+.scorebar .team i{width:10px;height:10px;background:var(--team);grid-row:span 2;box-shadow:0 0 0 2px #000}
+.scorebar .team b{font-size:26px;color:var(--noir-cream);grid-row:span 2}
+.scorebar .team:last-child{grid-template-columns:auto auto}
+.scorebar .team small{font:8px var(--pixel-small);letter-spacing:1px;color:var(--noir-dim)}
+.scorebar .team.is-mine span{text-decoration:underline;text-underline-offset:3px}
+.scorebar .round{display:grid;justify-items:center;gap:2px;min-width:110px}
+.scorebar .round small{font:8px var(--pixel-small);letter-spacing:1px;color:var(--noir-dim)}
+.scorebar .round strong{font:700 26px/1 var(--pixel)}
+.scorebar .round strong.urgent{color:var(--noir-alarm);animation:hud-blink 1s steps(2,jump-none) infinite}
+.role-card{position:absolute;top:max(14px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));max-width:min(300px,30vw);padding:9px 12px;display:grid;gap:3px}
+.role-name{font:700 22px/1 var(--pixel);text-transform:uppercase;letter-spacing:1px}
+.role-name.role-thief{color:var(--noir-lamp)}
+.role-name.role-police{color:#93b8e8}
+.role-team{font:9px var(--pixel-small);letter-spacing:1px;color:var(--team)}
+.role-card small{font:9px var(--pixel-small);letter-spacing:.5px;color:var(--noir-dim)}
+.role-card p{margin:2px 0 0;font:13px/1.35 var(--pixel)}
+.hud-side{position:absolute;top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));display:grid;gap:6px;padding:8px;justify-items:end}
+#minimap{display:block;width:176px;height:108px;image-rendering:pixelated;box-shadow:0 0 0 2px #000}
+#district{font:9px var(--pixel-small);letter-spacing:1px;color:var(--noir-dim);max-width:176px;text-align:right}
+.hud-side .hud-buttons{gap:8px}
+.hud-side .icon-button{width:38px;height:38px;padding:0;display:grid;place-items:center;font:700 18px/1 var(--pixel);color:var(--noir-cream);background:#151812;box-shadow:-2px 0 0 #000,2px 0 0 #000,0 -2px 0 #000,0 2px 0 #000}
+.objective-bar{position:absolute;bottom:max(16px,env(safe-area-inset-bottom));left:max(14px,env(safe-area-inset-left));display:flex;align-items:center;gap:6px;padding:8px 12px;font:12px var(--pixel)}
+.objective-bar .tasks-label{font:9px var(--pixel-small);letter-spacing:1px;color:var(--noir-dim);margin-right:2px}
+.objective-bar i{width:12px;height:12px;background:#1d211a;box-shadow:0 0 0 2px #000}
+.objective-bar i.is-done{background:var(--noir-lamp)}
+.objective-bar .exit-state{margin-left:8px;font:9px var(--pixel-small);letter-spacing:1px;color:var(--noir-alarm)}
+.objective-bar .exit-state.is-open{color:#7fd67a;animation:hud-blink 1.2s steps(2,jump-none) infinite}
+.objective-bar .free{margin-left:8px;font:9px var(--pixel-small);letter-spacing:1px;color:var(--noir-dim)}
+.abilities{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;max-width:60vw}
+.ability{display:flex;align-items:center;gap:6px;padding:8px 10px;font:500 14px/1 var(--pixel)}
+.ability:not(:disabled):hover{background:#191c16;filter:none}
+.ability:disabled{opacity:.42}
+.ability .key{margin-right:2px}
+.ab-meta{font:9px var(--pixel-small);color:var(--noir-lamp);min-width:0}
+.heat{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:calc(max(16px,env(safe-area-inset-bottom)) + 56px);display:flex;align-items:center;gap:8px;padding:6px 10px;font:9px var(--pixel-small);letter-spacing:1px}
+.heat i{display:block;width:120px;height:8px;background:linear-gradient(90deg,var(--noir-lamp),var(--noir-alarm));box-shadow:0 0 0 2px #000;transform-origin:left}
+.heat i{width:0;max-width:120px}
+.heat::after{content:'';position:absolute;left:79px;width:120px;height:8px;box-shadow:inset 0 0 0 2px #2b3127;pointer-events:none}
+.heat i.is-locked{background:var(--noir-alarm);animation:hud-blink .5s steps(2,jump-none) infinite}
+.sound-arrows{position:absolute;inset:0;pointer-events:none!important}
+.sound-arrow{position:absolute;display:grid;place-items:center;width:34px;height:34px;margin:-17px 0 0 -17px;color:#1d1708;font:700 15px/1 var(--pixel);transform:scale(var(--s))}
+.sound-arrow i{position:absolute;inset:0;background:var(--noir-lamp);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);transform:rotate(calc(var(--a) + 0deg));box-shadow:0 0 0 2px #000}
+.sound-arrow i::after{content:'';position:absolute;right:-9px;top:50%;margin-top:-6px;border:6px solid transparent;border-left:9px solid var(--noir-lamp)}
+.spectating{position:absolute;top:96px;left:50%;transform:translateX(-50%);padding:6px 12px;font:10px var(--pixel-small);letter-spacing:1px}
+.spectating[hidden]{display:none}
+.spectating .text-button{color:var(--noir-lamp);font-size:12px}
+.aimstick{display:none;position:absolute;width:120px;height:120px;right:max(150px,calc(env(safe-area-inset-right) + 150px));bottom:max(30px,env(safe-area-inset-bottom));border:3px solid var(--noir-edge);border-radius:50%;background:#0b0d0a99;touch-action:none}
+.aimstick .stick{width:48px;height:48px;position:absolute;top:33px;left:33px;border-radius:50%;background:#93b8e8;box-shadow:0 0 0 3px #000;pointer-events:none}
+.aimstick span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font:9px var(--pixel-small);color:var(--noir-dim)}
+@media(pointer:coarse){.aimstick{display:block}}
+body.touch .aimstick{display:block}
+@media(pointer:coarse),(max-width:900px){.ability .key{display:none}.ability{min-height:52px;min-width:72px;justify-content:center;font-size:15px}.abilities{max-width:44vw}}
+.phase-overlay{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none!important;z-index:20}
+.phase-overlay[hidden]{display:none}
+.brief-card,.round-card{pointer-events:auto;max-width:min(560px,90vw);padding:22px 26px;color:var(--noir-cream);background:#0b0d0af5;box-shadow:-4px 0 0 var(--noir-edge),4px 0 0 var(--noir-edge),0 -4px 0 var(--noir-edge),0 4px 0 var(--noir-edge),5px 9px 0 #000a;display:grid;gap:8px;-webkit-font-smoothing:none}
+.brief-card small,.round-card small{font:10px var(--pixel-small);letter-spacing:2px;color:var(--noir-dim)}
+.brief-card h2,.round-card h2{margin:0;font:700 32px/1.05 var(--pixel);text-transform:uppercase}
+.brief-card.role-thief h2{color:var(--noir-lamp)}
+.brief-card.role-police h2{color:#93b8e8}
+.brief-team{margin:0;font:13px var(--typewriter);color:var(--team)}
+.brief-card ul{margin:4px 0 0;padding-left:18px;font:14px/1.5 var(--typewriter)}
+.brief-card li b{color:var(--noir-lamp)}
+.brief-count{justify-self:end;font:700 34px/1 var(--pixel);color:var(--noir-cream)}
+.prep-banner{position:absolute;top:96px;left:50%;transform:translateX(-50%);padding:8px 16px;font:15px var(--pixel);white-space:nowrap}
+.prep-banner b{font-size:20px;color:var(--noir-lamp)}
+.prep-banner.role-police b{color:#93b8e8}
+.round-card{position:relative;max-width:min(620px,92vw)}
+.round-stamp{position:absolute;top:-14px;right:-8px;padding:5px 12px;border:4px solid var(--noir-alarm);color:var(--noir-alarm);background:#0b0d0a;font:700 22px/1 var(--pixel);text-transform:uppercase;transform:rotate(7deg);animation:stamp-down .35s cubic-bezier(.3,1.6,.6,1) .2s both}
+.round-card.thieves .round-stamp{border-color:var(--noir-lamp);color:var(--noir-lamp)}
+.round-card.won h2{color:#7fd67a}
+.highlights{margin:0;font:13px/1.4 var(--typewriter);color:var(--noir-lamp)}
+.round-rows{list-style:none;margin:4px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;font:12px var(--pixel)}
+.round-rows li{display:flex;align-items:center;gap:6px;min-width:0}
+.round-rows i{flex:none;width:8px;height:8px;background:var(--team);box-shadow:0 0 0 2px #000}
+.round-rows b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.round-rows em{font:8px var(--pixel-small);color:var(--noir-dim);font-style:normal}
+.round-rows span{margin-left:auto;font:9px var(--pixel-small);color:var(--noir-dim);white-space:nowrap}
+.next-up{margin:6px 0 0;font:12px var(--typewriter);color:var(--noir-dim)}
+.settings-pop{position:absolute;top:150px;right:max(14px,env(safe-area-inset-right));z-index:40;display:grid;gap:10px;padding:14px;font:12px var(--pixel)}
+.settings-pop label{display:grid;gap:4px}
+.settings-pop input{accent-color:var(--noir-lamp);width:180px}
+.mvps{margin:12px 0 0;font:14px/1.5 var(--typewriter)}
+/* Lobby settings card */
+.blueprint .settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.blueprint .settings label{display:grid;gap:4px;font:10px var(--pixel-small);letter-spacing:1px}
+.blueprint .settings select{appearance:none;width:100%;padding:7px 8px;border:0;border-radius:0;color:#e4effa;font:500 13px/1.2 var(--pixel);background:#173b62;box-shadow:-2px 0 0 #dbe9f6,2px 0 0 #dbe9f6,0 -2px 0 #dbe9f6,0 2px 0 #dbe9f6}
+.blueprint .settings select:disabled{opacity:.8}
+.blueprint img.plan{width:100%;height:auto;image-rendering:pixelated}
+.polaroid.bots .mug{font-size:40px;color:#efe7d48c}
+/* Map vote */
+.vote-screen{justify-content:center;gap:18px;padding:26px clamp(16px,4vw,48px);background:radial-gradient(70% 60% at 50% 20%,#1d2a22,#060605 75%);color:var(--noir-cream)}
+.vote-head{display:flex;justify-content:space-between;align-items:baseline;max-width:1100px;width:100%;margin:0 auto}
+.vote-clock{font:700 30px var(--pixel);color:var(--noir-lamp)}
+.vote-sub{max-width:1100px;width:100%;margin:0 auto;font:14px var(--typewriter);color:var(--noir-dim)}
+.vote-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;max-width:1100px;width:100%;margin:0 auto}
+.vote-card{display:grid;gap:8px;padding:12px;text-align:left;color:#2b241a;background:#efe7d4;border:0;border-radius:0;box-shadow:4px 6px 0 #000a;font:inherit;cursor:pointer;transform:rotate(-1deg)}
+.vote-card:nth-child(2){transform:rotate(1.2deg)}
+.vote-card img{width:100%;image-rendering:pixelated;box-shadow:0 0 0 2px #2b241a}
+.vote-card b{font:700 20px/1.1 var(--pixel)}
+.vote-card small{font:13px/1.4 var(--typewriter);color:#5d5444}
+.vote-card .votes{font:10px var(--pixel-small);letter-spacing:1px;color:#8f3b24}
+.vote-card.is-picked{outline:4px solid var(--noir-lamp);outline-offset:4px}
+.vote-card:focus-visible{outline:4px solid var(--noir-cream);outline-offset:4px}
+@media(max-width:760px){.vote-cards{grid-template-columns:1fr}.role-card{max-width:46vw}.scorebar{gap:10px;padding:6px 10px}.scorebar .team span,.scorebar .team small{display:none}.blueprint .settings{grid-template-columns:1fr}}
+@media(orientation:landscape) and (max-height:500px){
+.scorebar{top:max(6px,env(safe-area-inset-top));padding:5px 10px}.scorebar .round strong{font-size:20px}.scorebar .team b{font-size:20px}
+.role-card{top:max(6px,env(safe-area-inset-top));padding:6px 9px;max-width:28vw}.role-card p{display:none}.role-name{font-size:16px}
+.hud-side{top:max(6px,env(safe-area-inset-top));padding:5px}#minimap{width:132px;height:81px}
+.objective-bar{bottom:auto;top:max(70px,calc(env(safe-area-inset-top) + 64px));left:max(10px,env(safe-area-inset-left));padding:5px 8px;font-size:10px;max-width:24vw;flex-wrap:wrap}.objective-bar i{width:9px;height:9px}.objective-bar .free,.objective-bar .tasks-label{display:none}.objective-bar .exit-state{margin-left:4px}
+.joystick{bottom:max(14px,env(safe-area-inset-bottom))}.aimstick{bottom:max(14px,env(safe-area-inset-bottom));right:max(170px,calc(env(safe-area-inset-right) + 170px))}
+.abilities{bottom:max(12px,env(safe-area-inset-bottom));max-width:34vw;gap:8px}.ability{min-height:46px;min-width:64px;padding:6px 8px}
+.heat{bottom:calc(max(12px,env(safe-area-inset-bottom)) + 54px)}.heat i,.heat::after{width:80px}.heat::after{left:76px}
+.brief-card,.round-card{padding:14px 18px;gap:5px}.brief-card h2,.round-card h2{font-size:22px}.brief-card ul{font-size:12px;line-height:1.35}.round-rows{font-size:10px}
+.prep-banner{top:58px;font-size:12px}.radio{top:60px;min-width:0;max-width:46vw;font-size:12px;padding:12px 12px 8px}
+}

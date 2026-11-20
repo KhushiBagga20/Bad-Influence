@@ -14,7 +14,7 @@ try {
  assert.ok(ready,`Production server did not start: ${logs}`);
  const response=await fetch(url),html=await response.text();assert.equal(response.status,200);assert.match(html,/PETTY THEFT/);
  const asset=html.match(/src="([^\"]+\.js)"/)[1];const js=await fetch(url+asset);assert.equal(js.status,200);assert.ok((await js.text()).length>100000);
- const guide=await fetch(url+'/how-to-play.html');assert.equal(guide.status,200);assert.match(await guide.text(),/If you are a cop/);
+ const guide=await fetch(url+'/how-to-play.html');assert.equal(guide.status,200);assert.match(await guide.text(),/If you are police/);
  console.log('PASS guide, production HTML, bundled client, and health endpoint');
  const test=spawn(process.execPath,['--import','tsx','--test','tests/integration/multiplayer.test.ts'],{env:{...process.env,TEST_SERVER_URL:url},stdio:'inherit'});
  const exit=await new Promise(r=>test.on('exit',r));assert.equal(exit,0,'Production WebSocket checks failed');

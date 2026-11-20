@@ -1,3 +1,131 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>How to play — PETTY THEFT</title><style>
-*{box-sizing:border-box}body{margin:0;background:#101923;color:#e9e4d5;font:16px/1.7 system-ui,sans-serif}main{max-width:960px;margin:auto;padding:40px 24px}a{color:#eabe70}h1{font-size:clamp(40px,7vw,72px);line-height:1;margin:28px 0}h2{color:#eabe70}header{display:flex;justify-content:space-between;gap:20px}.intro{font-size:20px;color:#b4c9cb}.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}section{background:#192938;border:1px solid #ffffff20;border-radius:12px;padding:24px;margin:20px 0}li{margin:9px 0}kbd{background:#334656;border-radius:4px;padding:3px 7px}small{color:#a8bbc3}footer{padding:30px 0}
-</style></head><body><main><header><b>PETTY THEFT.</b><a href="/">Open the game →</a></header><h1>GOOD ART.<br>BAD INTENT.</h1><p class="intro">A 2–6 player game of prop hunt in a dark museum: thieves hide as furniture, cops search with flashlights.</p><section><h2>1. Get everyone into a room</h2><ol><li>Choose a nickname and create a room. Share its four-letter code with friends.</li><li>The host chooses a museum in the lobby: the original Museum of Questionable Taste, Velvet Vault, Midnight Archive, or Random. These are different layouts of the same museum.</li><li>Everyone readies up. The host starts the round. Changing the map resets readiness.</li></ol><p>Teams are random every round: one cop for 2–5 players, two cops for six. Everyone else is a thief. Late arrivals watch until the next round.</p></section><div class="teams"><section><h2>2. If you are a thief</h2><ul><li>You get a 30-second head start while the cops keep their eyes shut. Move, find treasure, and find a hiding spot.</li><li>You can see the whole museum, and the cops&rsquo; flashlight beams. Cops can only see what their beams light up.</li><li>Press <kbd>Q</kbd> near a highlighted prop to copy it. Press again to become a thief. Disguises move slower. Inside a beam, freeze: a prop that moves is a dead giveaway.</li><li>Sprinting (<kbd>Space</kbd>) is loud. Cops see footstep ripples near where you are, but not who you are.</li><li>Press <kbd>E</kbd> near treasure to pick it up. Carry two small items, worth $200 each.</li><li>A $700 painting is faster with two carriers. First carrier steers; second assists. Either presses <kbd>R</kbd> to drop it. You cannot disguise while carrying a painting.</li><li>Deposit at the van with <kbd>E</kbd>. Once the displayed crew quota is met, interact again empty-handed to escape.</li></ul><p><b>Win:</b> meet the quota and extract every free, connected thief. At least one must escape. Captured or disconnected teammates can be left behind.</p></section><section><h2>2. If you are a cop</h2><ul><li>Keep your eyes closed for the 30-second head start. Then the lights stay off: you only see what your flashlight lights up, plus a faint floor plan.</li><li>Aim with the mouse (on a keyboard or phone, the beam follows your movement). Walls block the beam.</li><li>Press <kbd>E</kbd> or click to arrest the exact object your beam points at; it gets a blue ring. Get close: arrests only reach a short way.</li><li>Catching a thief has a 2-second cooldown. Arresting a real prop is a miss with a 5-second cooldown, and everyone sees it.</li><li>Gold ripples are footsteps: a thief sprinting nearby.</li><li>Cops cannot disguise or steal. There is no cop <kbd>Q</kbd> action.</li><li>The van apron is protected from arrest. Stop thieves before they get there.</li></ul><p><b>Win:</b> arrest all connected thieves before they escape, or hold out until the seven-minute lockdown timer expires.</p></section></div><section><h2>3. Getting caught is not always the end</h2><p>Captured thieves go to the holding room. A free teammate can stand near its lock, press <kbd>E</kbd>, and stay still for three seconds to rescue everyone. Moving cancels the rescue. Rescued thieves receive a five-second green shield against immediate re-arrest. If all connected thieves are captured, the round ends immediately.</p></section><section><h2>Controls and phones</h2><p><kbd>Space</kbd> / Sprint button: a 1.4-second burst of speed, with an 8-second cooldown. Both teams can sprint, but thieves must drop paintings and leave their disguise first. Explore the expanded east wing: Conservatory, Royal Collection, Restoration Studio and Antiquities.</p><p><kbd>WASD</kbd> / arrow keys: move · Mouse: aim your flashlight (cops) · <kbd>E</kbd> or click: interact, or arrest as a cop · <kbd>Q</kbd>: disguise (thieves only) · <kbd>R</kbd>: drop loot (thieves only).</p><p>On a phone, rotate to landscape. Move with the left joystick and use the action buttons on the right. The <b>?</b> menu also lets desktop players turn on touch controls. Sound is optional.</p></section><section><h2>Between rounds</h2><p>The winning team sees a celebration; the losing team sees its own defeat screen. The host returns everyone to the lobby to select another map. Ready up again for new random teams.</p><p>Refreshing the same tab restores your identity. Disconnecting drops carried loot. The clock keeps running while a tab is backgrounded. Empty rooms expire after two minutes.</p><small>Friends need the same reachable game URL. On another device, localhost refers to that device—not the computer hosting your game.</small></section><footer><a href="/">Ready? Open PETTY THEFT →</a></footer></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>How to play · Petty Theft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Silkscreen&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#050605;--panel:#0b0d0a;--edge:#3a4334;--cream:#eadfc4;--dim:#9a967f;--lamp:#f1c46a;--blue:#93b8e8;--alarm:#d9614a;--green:#7fd67a}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(80% 60% at 50% 0%,#1a2119,#050605 70%) fixed;color:var(--cream);font:17px/1.6 'Special Elite','Courier New',monospace;padding:max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 48px max(16px,env(safe-area-inset-left))}
+main{max-width:860px;margin:0 auto}
+h1,h2,h3{font-family:'Pixelify Sans',monospace;line-height:1.1;margin:1.4em 0 .4em}
+h1{font-size:clamp(36px,7vw,56px);margin-top:.2em}h1 span{color:var(--lamp)}
+h2{font-size:28px;color:var(--lamp)}h3{font-size:21px}
+.lede{font-size:19px;color:var(--cream)}
+section{background:var(--panel);padding:18px 22px;margin:22px 0;box-shadow:-3px 0 0 var(--edge),3px 0 0 var(--edge),0 -3px 0 var(--edge),0 3px 0 var(--edge),4px 8px 0 #000a}
+section h2:first-child{margin-top:.1em}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.police h2{color:var(--blue)}
+kbd{display:inline-block;padding:2px 6px;margin:0 2px;color:#1d1708;background:var(--cream);font:12px 'Silkscreen',monospace;box-shadow:0 3px 0 #7d7562;vertical-align:2px}
+ol,ul{padding-left:22px}li{margin:.25em 0}
+table{width:100%;border-collapse:collapse;font-size:15px}th,td{text-align:left;padding:6px 8px;border-bottom:1px dashed var(--edge)}th{font:13px 'Silkscreen',monospace;color:var(--dim)}
+a{color:var(--lamp)}a:focus-visible{outline:3px solid var(--lamp);outline-offset:3px}
+.note{color:var(--dim);font-size:15px}
+@media(max-width:700px){.cols{grid-template-columns:1fr}body{font-size:16px}}
+</style>
+</head>
+<body>
+<main>
+<p><a href="/">← Back to the game</a></p>
+<h1>How to play <span>Petty Theft</span></h1>
+<p class="lede">A prop hunt for 1–10 players. Two teams take turns: one round as thieves hiding in plain sight as the furniture, the next round as the police trying to catch them.</p>
+
+<section>
+<h2>A match</h2>
+<ol>
+<li><b>Lobby.</b> Share the four-letter room code. The host picks the map (or lets the crew vote), how many round wins take the match (first to 3 by default), and whether bots fill empty seats.</li>
+<li><b>Teams.</b> Everyone is split at random into two teams, the <b>Magpies</b> and the <b>Raccoons</b>. Teams stay the same all match.</li>
+<li><b>Map vote.</b> Rounds come in pairs on the same map and layout, so both teams get the same board as thieves and as police. Maps rotate between pairs.</li>
+<li><b>Briefing.</b> A card tells you your role this round and the next.</li>
+<li><b>Preparation (25 seconds).</b> Thieves hide. Police are locked in their staging room and can’t see out.</li>
+<li><b>Play (about 4 minutes).</b> The staging gate opens.</li>
+<li><b>Round result.</b> The winning team scores a point. Then the teams swap roles.</li>
+<li><b>Match result.</b> The first team to the target wins. The host can start a rematch or go back to the lobby.</li>
+</ol>
+<h3>How a round is won</h3>
+<ul>
+<li><b>Police win</b> by catching every thief before time runs out.</li>
+<li><b>Thieves win</b> if even one of them is still free when time runs out, <b>or</b> if they finish enough tasks to open the exit and every thief who is still free gets out through it.</li>
+<li>If the last thief is caught on the very last moment, the police win: captures are counted before the clock.</li>
+</ul>
+</section>
+
+<div class="cols">
+<section>
+<h2>If you are a thief</h2>
+<ul>
+<li>Walk up to a prop and press <kbd>Q</kbd> to look exactly like it. <kbd>R</kbd> mirrors your disguise to match its neighbours; <kbd>Z</kbd> drops it.</li>
+<li>You can move while disguised, more slowly. A prop that slides around in front of an officer is a giveaway, so freeze when they look your way.</li>
+<li>Every 25–35 seconds you make a <b>sound</b>: a whistle, or a sound that matches your disguise. A countdown above your head warns you. Police hear roughly where it came from, so think about moving afterwards.</li>
+<li><kbd>E</kbd> starts a <b>task</b>: disable a security panel, forge an exhibit label, or unlock the loading bay. Stand still for 3–6 seconds; moving, a stun or a capture cancels it. Tasks leave a clue (an opened panel, a swapped label) and the radio names the part of the building.</li>
+<li>Finish the required tasks (shown at the bottom left) and the <b>exit opens</b>. Get there to escape.</li>
+<li><kbd>F</kbd> drops a <b>decoy</b> that makes two fake sounds (twice a round). <kbd>SPACE</kbd> throws <b>smoke</b> once a round: police can’t see or shoot through it, and you get a burst of speed.</li>
+</ul>
+</section>
+<section class="police">
+<h2>If you are police</h2>
+<ul>
+<li>You start locked in staging during the preparation phase.</li>
+<li>You see what your team can see. Everything else is dimmed, and nothing there is shown.</li>
+<li>Aim with the mouse (or the right thumbstick) and <b>click</b> or <kbd>SPACE</kbd> to fire. The dashed line shows where a shot goes; walls and smoke stop it.</li>
+<li>A shot that hits a thief, disguised or not, catches them. A shot that hits a <b>real prop heats your blaster</b>. Get it too hot and it locks for a few seconds.</li>
+<li><kbd>Q</kbd> or right-click: a <b>stun pulse</b> (once a round). Thieves nearby freeze, lose their task progress, and a stunned disguise visibly wobbles.</li>
+<li><b>Sound arrows</b> at the edge of your screen point toward what you heard. Bigger and brighter means closer. They give a direction, never an exact spot.</li>
+</ul>
+</section>
+</div>
+
+<section>
+<h2>Controls</h2>
+<table>
+<thead><tr><th>Action</th><th>Keyboard &amp; mouse</th><th>Touch (landscape)</th></tr></thead>
+<tbody>
+<tr><td>Move</td><td><kbd>WASD</kbd> or arrows</td><td>Left thumbstick</td></tr>
+<tr><td>Aim (police)</td><td>Mouse</td><td>Right thumbstick</td></tr>
+<tr><td>Fire (police)</td><td>Click or <kbd>SPACE</kbd></td><td>Fire button, or let go of the aim stick</td></tr>
+<tr><td>Stun (police)</td><td><kbd>Q</kbd> or right-click</td><td>Stun button</td></tr>
+<tr><td>Copy a prop / drop disguise</td><td><kbd>Q</kbd> / <kbd>Z</kbd></td><td>Copy button</td></tr>
+<tr><td>Mirror disguise</td><td><kbd>R</kbd></td><td>Mirror button</td></tr>
+<tr><td>Task</td><td><kbd>E</kbd></td><td>Task button</td></tr>
+<tr><td>Decoy · Smoke</td><td><kbd>F</kbd> · <kbd>SPACE</kbd></td><td>Decoy · Smoke buttons</td></tr>
+<tr><td>Next camera when out</td><td><kbd>TAB</kbd></td><td>“Next teammate”</td></tr>
+<tr><td>Help · Sound settings</td><td><kbd>H</kbd> · ♪ button</td><td>? · ♪ buttons</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2>Maps</h2>
+<ul>
+<li><b>Grand Museum After Hours:</b> galleries, a sculpture hall, restoration rooms, a security wing, a moonlit courtyard and a loading bay with the way out.</li>
+<li><b>Night Market:</b> lantern-lit stalls, a food court, cold storage, back alleys and a delivery yard gate.</li>
+<li><b>Seaside Arcade:</b> neon halls, a prize counter, a café, maintenance corridors, a bumper car rink and a boardwalk out to the pier.</li>
+</ul>
+<p class="note">Every layout opens and closes some passages, places its props and picks its task spots from a seed, and is checked to be fully connected before you play it.</p>
+</section>
+
+<section>
+<h2>Bots, joining late and dropping out</h2>
+<ul>
+<li>With bots on, empty seats are filled up to ten, five against five. Bots are labelled in the roster, follow the same rules and swap roles with their team. Police bots only know what a human officer on their team could see.</li>
+<li>A friend joining mid-match takes over a bot’s seat: its team, its role and where it is right now.</li>
+<li>If you drop out, a bot keeps your seat warm. Reopen the game in the same tab to take it back with your team and score.</li>
+<li>Matches live only in the server’s memory: if the server restarts, the match ends.</li>
+</ul>
+</section>
+
+<section>
+<h2>Accessibility</h2>
+<ul>
+<li>Every important sound has a visual: arrows for sounds, a countdown for your own whistle, the radio box for events.</li>
+<li>Sound effects and music have separate volume controls (the ♪ button in a match).</li>
+<li>If your system asks for reduced motion, flashing, wobbling and typing effects are turned off.</li>
+<li>Phones play in landscape, with large buttons. Turn your phone sideways if you see the rotate screen.</li>
+</ul>
+</section>
+</main>
+</body>
+</html>

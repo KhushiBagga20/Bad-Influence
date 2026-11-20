@@ -10,3 +10,10 @@ services:
         value: production
       - key: CLIENT_ORIGIN
         sync: false
+      # Optional: OpenAI bot strategy. Bots work without these.
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_BOTS_ENABLED
+        value: "true"
+      - key: OPENAI_BOT_MODEL
+        value: gpt-4.1-mini

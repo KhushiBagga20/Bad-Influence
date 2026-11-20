@@ -225,6 +225,53 @@ SPARKLE = art([
 ], {'a': hexc('#f1c46a'), 'b': hexc('#fff6d8')})
 
 
+K = '#141222'
+CABINET = [
+    '...KKKKKKKKKK...', '..KAAAAAAAAAAK..', '..KABBBBBBBBAK..', '..KABSSSSSSBAK..', '..KABSWSSSSBAK..', '..KABSSSSWSBAK..',
+    '..KABSSSSSSBAK..', '..KABBBBBBBBAK..', '..KAAAAAAAAAAK..', '.KCCCCCCCCCCCCK.', '.KCDDRDDDDYDDCK.', '.KCDDDDDDDDDDCK.',
+    '.KCCCCCCCCCCCCK.', '..KAAAAAAAAAAK..', '..KAAEEEEEEAAK..', '..KAAEFFFFEAAK..', '..KAAEEEEEEAAK..', '..KAAAAAAAAAAK..',
+    '..KAAAAAAAAAAK..', '..KAAAAAAAAAAK..', '..KAAAAAAAAAAK..', '..KKKKKKKKKKKK..']
+CAB_PAL = {'K': K, 'B': '#2a2440', 'S': '#2bd1c4', 'W': '#e8fffb', 'C': '#3b335a', 'D': '#4f466e', 'R': '#e2534a', 'Y': '#f1c46a', 'E': '#c9b98a', 'F': '#1a1a1a'}
+CUSTOM = [
+    ('cabinet', CABINET, {**CAB_PAL, 'A': '#6a3fa0'}),
+    ('cabinet2', CABINET, {**CAB_PAL, 'A': '#2f7f86', 'S': '#f1c46a', 'W': '#fff6d8'}),
+    ('claw', ['..KKKKKKKKKKKK..', '..KPPPPPPPPPPK..', '..KPWWPPPPWWPK..', '..KKKKKKKKKKKK..', '..KGGGGLGGGGGK..', '..KGGGGLGGGGGK..',
+              '..KGGGLLLGGGGK..', '..KGGLGGGLGGGK..', '..KGGGGGGGGGGK..', '..KGOGGTGGOGGK..', '..KOOTOOTTOOTK..', '..KKKKKKKKKKKK..',
+              '..KAAAAAAAAAAK..', '..KAAEEAAAAAAK..', '..KAAEFAAAYAAK..', '..KAAAAAAAAAAK..', '..KAAAAAAAAAAK..', '..KAAAAAAAAAAK..', '..KKKKKKKKKKKK..'],
+     {'K': K, 'P': '#e48daa', 'W': '#ffe3ec', 'G': '#8fd3e6', 'L': '#c0c4cc', 'O': '#ed956b', 'T': '#6fd7df', 'A': '#c94f6d', 'E': '#c9b98a', 'F': '#1a1a1a', 'Y': '#f1c46a'}),
+    ('umbrella', ['......KKKK......', '....KKRWRWKK....', '..KKRRWWRRWWKK..', '.KRRRWWWRRRWWWK.', 'KRRRRWWWRRRRWWWK', 'KKKKKKKKKKKKKKKK',
+                  '.......KP.......', '.......KP.......', '.......KP.......', '.......KP.......', '.......KP.......', '.......KP.......',
+                  '.......KP.......', '.......KP.......', '.......KP.......', '......KBBK......', '.....KBBBBK.....', '.....KKKKKK.....'],
+     {'K': K, 'R': '#d9614a', 'W': '#f3ead6', 'P': '#d6d0c0', 'B': '#6b6658'}),
+    ('buoy', ['.....KKKKKK.....', '...KKOOWWOOKK...', '..KOOOWWWWOOOK..', '.KOOKKKKKKKKOOK.', '.KOK........KOK.', 'KWWK........KWWK',
+              'KWWK........KWWK', '.KOK........KOK.', '.KOOKKKKKKKKOOK.', '..KOOOWWWWOOOK..', '...KKOOWWOOKK...', '.....KKKKKK.....'],
+     {'K': K, 'O': '#ed7d3a', 'W': '#f3ead6'}),
+    ('stool', ['....KKKKKKKK....', '...KRRRRRRRRK...', '...KRWWRRRRRK...', '...KRRRRRRRRK...', '....KKKKKKKK....', '......KMMK......',
+               '......KMMK......', '......KMMK......', '.....KMMMMK.....', '....KMMMMMMK....', '....KKKKKKKK....'],
+     {'K': K, 'R': '#d9614a', 'W': '#f0a08f', 'M': '#8a8f99'}),
+    ('task-panel', ['..KKKKKKKKKKKK..', '..KGGGGGGGGGGK..', '..KGDDDDDDDDGK..', '..KGDRDYDLDDGK..', '..KGDDDDDDDDGK..', '..KGDWWWWWWDGK..',
+                    '..KGDDDDDDDDGK..', '..KGGGGGGGGGGK..', '..KGGGKKKKGGGK..', '..KKKKKKKKKKKK..'],
+     {'K': K, 'G': '#8a8f99', 'D': '#3a3f4a', 'R': '#e2534a', 'Y': '#f1c46a', 'L': '#7fd67a', 'W': '#c9cdd6'}),
+    ('task-panel-done', ['.....S...S......', '..KKKKKKKKKKKK..', '..KGGGGGGGGGGK..', '..KGDDDDDDDDGK..', '..KGDDDDDDDDGK..', '..KGDDDDDDDDGK..',
+                         '..KGDWSWWSWDGK..', '..KGDDDDDDDDGK..', '..KGGGGGGGGGGK..', '..KGGGKKKKGGGK..', '..KKKKKKKKKKKK..'],
+     {'K': K, 'G': '#8a8f99', 'D': '#22252c', 'W': '#c9cdd6', 'S': '#f1c46a'}),
+    ('task-label', ['..KKKKKKKKKKKK..', '..KCCCCCCCCCCK..', '..KCTTTTTTTTCK..', '..KCTTTTTCCCCK..', '..KCTTTTTTTCCK..', '..KCCCCCCCCCCK..',
+                    '..KKKKKKKKKKKK..', '.......KK.......', '.......KK.......', '.......KK.......', '.....KKKKKK.....'],
+     {'K': K, 'C': '#e8dcc0', 'T': '#6b5d48'}),
+    ('task-label-done', ['..KKKKKKKKKKKK..', '..KCCCCCCCCCCK..', '..KCNNNNNNNNCK..', '..KCNNCCCCNNCK..', '..KCCCNNNNCCCK..', '..KCCCCCCCCCCK..',
+                         '..KKKKKKKKKKKK..', '.......KK.......', '.......KK.......', '.......KK.......', '.....KKKKKK.....'],
+     {'K': K, 'C': '#f3e6c0', 'N': '#b8322a'}),
+    ('task-loading', ['..KKKKKKKKKKKK..', '..KYBYBYBYBYBK..', '..KBYBYBYBYBYK..', '..KMMMMMMMMMMK..', '..KMMKKKKKKMMK..', '..KMMKRRKKKMMK..',
+                      '..KMMKKKKKKMMK..', '..KMMMMMLMMMMK..', '..KMMMMMLMMMMK..', '..KMMMMLLLMMMK..', '..KKKKKKKKKKKK..'],
+     {'K': K, 'Y': '#e0b13a', 'B': '#22201c', 'M': '#7d8590', 'R': '#e2534a', 'L': '#c9cdd6'}),
+    ('task-loading-done', ['..KKKKKKKKKKKK..', '..KYBYBYBYBYBK..', '..KBYBYBYBYBYK..', '..KMMMMMMMMMMK..', '..KMMKKKKKKMMK..', '..KMMKGGKKKMMK..',
+                           '..KMMKKKKKKMMK..', '..KMMMMMMMMMMK..', '..KMMLLLMMMMMK..', '..KMMMMLMMMMMK..', '..KKKKKKKKKKKK..'],
+     {'K': K, 'Y': '#e0b13a', 'B': '#22201c', 'M': '#7d8590', 'G': '#7fd67a', 'L': '#c9cdd6'}),
+    ('decoy', ['..KK....', '.KMK.W..', 'KMMK..W.', 'KMMK..W.', '.KMK.W..', '..KK....'], {'K': K, 'M': '#8a8f99', 'W': '#f1c46a'}),
+    ('puff', ['..WWWW..', '.WWLLWW.', 'WWLLLLWW', 'WLLLLLLW', 'WWLLLLWW', '.WWWWWW.'], {'W': '#c9c6bd', 'L': '#ece9e0'}),
+]
+
+
 def on_plinth(item, plinth, overlap=1):
     """Sets an item on a plinth: the item's lowest opaque row rests on the plinth's top edge."""
     b = bottom(item)
@@ -260,6 +307,25 @@ def main(urban_dir, indoor_dir):
     frames['van'] = [a + b for a, b in zip(ui(21, 16), ui(22, 16))]
     frames['shadow'] = SHADOW
     frames['sparkle'] = SPARKLE
+    # Market and shared street props.
+    frames['crate'] = ui(3, 10)
+    frames['tree'] = ui(16, 9)
+    frames['fruit'] = ui(4, 11)
+    frames['produce'] = ui(5, 11)
+    frames['barrel'] = ui(9, 9)
+    frames['sack'] = ui(11, 9)
+    frames['hydrant'] = ui(8, 9)
+    frames['mailbox'] = ui(8, 11)
+    frames['parcel'] = ui(10, 11)
+    frames['lantern'] = stack(ui(7, 6), ui(7, 7))
+    frames['chair'] = ii(0, 2)
+    frames['gem'] = frames['loot-1']
+    frames['candelabra'] = frames['loot-0']
+    frames['silver'] = frames['loot-2']
+    frames['shield'] = frames['loot-3']
+    # Original pixel art in the packs' style for things neither pack has.
+    for name, rows, pal in CUSTOM:
+        frames[name] = art(rows, {k: hexc(v) for k, v in pal.items()})
 
     # Shelf-pack with a 1px gutter so nearest-neighbour sampling never bleeds between frames.
     W, x, y, shelf, rects = 256, 1, 1, 0, {}

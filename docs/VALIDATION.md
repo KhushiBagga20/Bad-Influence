@@ -1,5 +1,55 @@
 # Verification record
 
+## Team prop hunt: alternating roles, tasks, three maps (19 November 2026)
+
+Tested locally with Node 24.18. Nothing was deployed or pushed.
+
+**Automated (all passing):** `npm run typecheck`, `npm test` (38 tests), `npm run build`, `npm run test:production` (production HTML, guide, bundle, health, and the network tests against the production server).
+- *Match flow:* 5 v 5 bot fill, vote → briefing → prep → play with the gate opening only for play, fixed teams swapping roles each round, the same map and layout within a pair, rotation between pairs, scoring and first-to-N victory, rematch and back to lobby, host-only settings.
+- *Seats:* the ten-seat cap, mid-match takeover of a bot seat (inheriting team, role, position and disguise), disconnects handed to a bot with the token restoring the same seat and team without touching scores, newcomers preferring pure bot seats, late joiners without bots joining the smaller team as spectators until the next round, and the host always human.
+- *Rules:*
+  - Police are confined during prep, can't shoot or stun, and see no thieves.
+  - Police snapshots: no hidden positions, disguised thieves only as anonymous props, unseen props not sent, decoys and sound owners withheld, no server-only fields.
+  - Shots: captures of visible and disguised thieves; none through walls or out of range; heat lock after wrong shots.
+  - Stun freezes thieves, cancels tasks and makes disguises wobble.
+  - Tasks: range and sight, interruption, completion, district clue, exit unlock, and no tasks through walls.
+  - Round ends: escape win, timeout win, and a final-tick capture going to the police.
+  - Police can't disguise. Disguise range, cooldown and mirroring; staggered sound cues; decoy and smoke limits; smoke blocking sight.
+- *Maps:* all three maps × 30 seeds validate (tasks, exit, staging and every prop reachable; staging and exit sealed while shut, with props placed). Corner-to-corner crossing takes 22–45 s. Bot routes reach every task, the exit and staging.
+- *Bots:* full bot-filled matches with captures and tasks, bots swapping roles, police bots receiving only the police view, a failing planner falling back to local play without stalling, planner validation (ids and focus per role, `store:false`, the key never in the body, no positions or names), and no planner calls without a key.
+- *Network:* eleven real Socket.IO clients against a spawned production-mode server.
+  - Ten fill a room and the eleventh is refused; rooms stay isolated.
+  - 5 v 5 start, with each socket receiving the view for its role (police with no thief positions).
+  - A thief moves during prep; a reconnect with the token keeps seat and team.
+  - A solo bot-filled start over the network, then a second player taking a bot seat.
+
+**Simulated balance (bot only, Museum, 41 rounds):** thieves won 12 (29%); rounds averaged 169 s of play. This was tuned over several passes with police bots limited to human-like information: fuzzy hearing, short-term memory, aim spread and reaction delay.
+
+**Browser checks** (built-in browser pane, dev server; the pane was hidden, so frame rates were throttled):
+- *Desktop, 1100 × 680:* title backdrop; lobby with match settings and the map thumbnail; a solo bot-filled match on the Grand Museum.
+  - As police: briefing, staging, the gate opening, walking out into the police fog of war (unseen props not drawn), a shot fired.
+  - Round 1 → round 2 swapped roles on the same map, as a thief.
+  - A second tab took over a bot seat mid-round (that seat had already been caught, which led to the takeover order fix below).
+  - Thief and spectator views: disguised teammates labelled for the thieves only, task objects.
+- *Landscape phone, 844 × 390, touch controls:* both sticks, the large ability buttons, and a disguise made with the Copy button.
+- *Fixes found during these checks:*
+  - Pillar faces drew black squares.
+  - The parquet floor read as brick.
+  - The landscape HUD overlapped itself.
+  - The clock and banner rounded differently.
+  - Bots could outvote the only human.
+  - Takeover could land a newcomer in an already-caught seat.
+- *Not seen:* a full round-result overlay or the match-end newspaper live in the browser (the hidden pane's throttling made timing them impractical). They are exercised in the simulation tests, which cover the state they render.
+
+**Not verified:** physical phones and real touch, more than two browser sessions at once (the ten-client check was headless), real internet latency, a public deployment, live paid OpenAI requests, frame rate on low-end devices, and balance with human players.
+
+---
+
+## Earlier records (retired designs)
+
+The records below describe earlier versions (co-op guards, loot, the flashlight-only dark museum). Kept for history.
+
+
 Tested locally on 13 November 2026 with Node 24.18.0. No public deployment was performed.
 
 ## Passed
@@ -61,3 +111,12 @@ Development preview was stopped after verification. Run `npm run dev` to play ag
 - All three front pages (robbed, arrested, lockdown) were rendered from hand-made results states through a temporary page hook, since removed, at 1000 × 640 and a 375 × 812 phone.
 - Removed 53 CSS rules for classes from the old home, lobby and results screens that nothing uses.
 - Not verified: a real phone, and the stamp animation at full frame rate.
+
+
+## Ten-player backend — 18 November 2026
+
+Inspected local checkout at `8858594` and fetched GitHub `origin/main` at `dd423cb`; the only remote difference was a merge commit, with identical file trees. Local changes were preserved; no push or deployment was made.
+
+Build/typecheck and backend tests cover ten-seat admission, nine-bot solo starts, takeover, reconnect, human-only host transfer, rematch refill, bot movement/theft and mocked OpenAI response validation/failure. Production integration checks connect ten independent WebSocket clients, replace all bots with humans, verify ongoing state ticks, and reject an eleventh. Existing multiplayer room-isolation and reconnect tests also pass.
+
+No live paid OpenAI call was made. Tests use a fake key and injected fetch response. Internet deployment, ten physical devices, sustained production load and high-latency gameplay remain unverified. Bots avoid large paintings and have basic tactics. The current data plane remains one in-memory authoritative Node process.
